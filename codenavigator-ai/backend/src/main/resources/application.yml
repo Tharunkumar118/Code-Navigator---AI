@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: codenavigator-ai
+
+  profiles:
+    active: h2
+
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+
+server:
+  port: 8081
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.codenavigator.ai: DEBUG
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+app:
+  jwt:
+    # MUST be overridden via env var in real deployments - this default is dev-only.
+    secret: ${JWT_SECRET:dev-only-change-me-this-must-be-at-least-256-bits-long-for-hs256}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours
+  ai:
+    gemini:
+      # REQUIRED for the AI Chat feature to give real, per-question answers.
+      # Without this set, chat silently runs in a primitive keyword-matching
+      # OFFLINE fallback that gives the same generic summary for most prompts.
+      # Get a free key at https://aistudio.google.com/apikey, then set the
+      # GEMINI_API_KEY environment variable before starting the backend.
+      api-key: ${GEMINI_API_KEY:}
+      # "gemini-flash-latest" is a Google-managed alias that always points to
+      # their current recommended fast model, so it won't silently 404 again
+      # the way a hardcoded "gemini-1.5-flash" did once that model was
+      # shut down. Override via GEMINI_MODEL if you want a specific version.
+      model: ${GEMINI_MODEL:gemini-flash-latest}

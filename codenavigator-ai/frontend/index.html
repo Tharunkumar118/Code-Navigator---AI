@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeNavigator AI — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="app.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <!-- Auth Overlay -->
+    <div id="authOverlay" class="auth-overlay">
+        <div class="auth-card glass">
+            <div class="auth-header">
+                <div class="logo">
+                    <i data-lucide="terminal" class="logo-icon"></i>
+                    <span>CodeNavigator <span class="accent">AI</span></span>
+                </div>
+                <h2 id="authTitle">Sign In</h2>
+                <p id="authSubtitle">Access your code intelligence panel</p>
+            </div>
+            
+            <form id="authForm">
+                <div class="input-group" id="regFullNameGroup">
+                    <label for="fullName">Full Name</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="user" class="input-icon"></i>
+                        <input type="text" id="fullName" placeholder="John Doe">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="mail" class="input-icon"></i>
+                        <input type="email" id="email" required placeholder="name@domain.com">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+                </div>
+                
+                <button type="submit" id="authSubmitBtn" class="btn primary-btn btn-block">
+                    <span>Sign In</span>
+                    <i data-lucide="arrow-right"></i>
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <span id="authToggleText">Don't have an account?</span>
+                <a href="#" id="authToggleLink" class="accent-link">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Grid -->
+    <div id="appContainer" class="app-container hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar glass">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i data-lucide="terminal" class="logo-icon"></i>
+                    <span>CodeNavigator <span class="accent">AI</span></span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-view="repos">
+                    <i data-lucide="git-branch"></i>
+                    <span>Repositories</span>
+                </a>
+                <a href="#" class="nav-item" data-view="architecture" id="navArch">
+                    <i data-lucide="layout-grid"></i>
+                    <span>Architecture</span>
+                </a>
+                <a href="#" class="nav-item" data-view="metrics" id="navMetrics">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Source Code</span>
+                </a>
+                <a href="#" class="nav-item" data-view="apidocs" id="navApi">
+                    <i data-lucide="book-open"></i>
+                    <span>API Docs</span>
+                </a>
+                <a href="#" class="nav-item" data-view="database" id="navDatabase">
+                    <i data-lucide="database"></i>
+                    <span>Database</span>
+                </a>
+                <a href="#" class="nav-item" data-view="quality" id="navQuality">
+                    <i data-lucide="shield-alert"></i>
+                    <span>Code Quality</span>
+                </a>
+                <a href="#" class="nav-item" data-view="security" id="navSecurity">
+                    <i data-lucide="shield-check"></i>
+                    <span>Security Analysis</span>
+                </a>
+                <a href="#" class="nav-item" data-view="chat" id="navChat">
+                    <i data-lucide="message-square"></i>
+                    <span>AI Chat</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-badge">
+                    <div class="user-avatar" id="userInitial">U</div>
+                    <div class="user-info">
+                        <span class="user-name" id="userDisplayName">User Profile</span>
+                        <span class="user-email" id="userDisplayEmail">user@example.com</span>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="logout-btn" title="Sign Out">
+                    <i data-lucide="log-out"></i>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Header Banner -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h1 id="pageTitle">Repositories</h1>
+                    <p id="pageSubtitle">Register, clone, and manage scanned repositories</p>
+                </div>
+                <div class="header-actions">
+                    <div id="activeRepoSelectorContainer" class="repo-selector-container hidden" style="display: flex; align-items: center; gap: 1rem;">
+                        <label for="activeRepoSelect">Current Active Repo:</label>
+                        <select id="activeRepoSelect" class="glass-select"></select>
+                        
+                        <!-- Export reports dropdown menu -->
+                        <div class="dropdown-wrapper" style="position: relative;" id="exportDropdownWrapper">
+                            <button class="btn secondary-btn" id="exportMenuBtn" style="padding: 6px 12px; height: 36px; display: flex; align-items: center; gap: 6px;">
+                                <i data-lucide="download"></i>
+                                <span>Export Spec</span>
+                            </button>
+                            <div class="dropdown-menu hidden" id="exportDropdownMenu" style="position: absolute; right: 0; top: 42px; background: #1e1e2e; border: 1px solid var(--border-color); border-radius: 8px; width: 180px; z-index: 1000; box-shadow: 0 8px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; padding: 4px;">
+                                <a href="#" onclick="exportReport('markdown')" style="padding: 8px 12px; color: var(--text-color); font-size: 13px; display: flex; align-items: center; gap: 8px; text-decoration: none; border-radius: 4px;" class="menu-link"><i data-lucide="file-text" style="width:14px;"></i> Markdown Spec</a>
+                                <a href="#" onclick="exportReport('html')" style="padding: 8px 12px; color: var(--text-color); font-size: 13px; display: flex; align-items: center; gap: 8px; text-decoration: none; border-radius: 4px;" class="menu-link"><i data-lucide="chrome" style="width:14px;"></i> HTML Spec</a>
+                                <a href="#" onclick="exportReport('openapi')" style="padding: 8px 12px; color: var(--text-color); font-size: 13px; display: flex; align-items: center; gap: 8px; text-decoration: none; border-radius: 4px;" class="menu-link"><i data-lucide="code-2" style="width:14px;"></i> OpenAPI JSON</a>
+                                <a href="#" onclick="exportReport('quality')" style="padding: 8px 12px; color: var(--text-color); font-size: 13px; display: flex; align-items: center; gap: 8px; text-decoration: none; border-radius: 4px;" class="menu-link"><i data-lucide="shield-alert" style="width:14px;"></i> Quality JSON</a>
+                                <a href="#" onclick="exportReport('svg')" style="padding: 8px 12px; color: var(--text-color); font-size: 13px; display: flex; align-items: center; gap: 8px; text-decoration: none; border-radius: 4px;" class="menu-link"><i data-lucide="file-code" style="width:14px;"></i> Architecture SVG</a>
+                                <a href="#" onclick="window.print()" style="padding: 8px 12px; color: var(--text-color); font-size: 13px; display: flex; align-items: center; gap: 8px; text-decoration: none; border-radius: 4px;" class="menu-link"><i data-lucide="printer" style="width:14px;"></i> Print PDF</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Dynamic Content Sections -->
+            <div class="content-body">
+                
+                <!-- Section: Repositories -->
+                <section id="view-repos" class="view-section">
+                    <div class="grid-layout">
+                        
+                        <!-- Submit Repository Card -->
+                        <div class="card glass span-4">
+                            <div class="card-header">
+                                <h3 class="card-title">Register Repository</h3>
+                                <p class="card-desc">Scan a public GitHub repository</p>
+                            </div>
+                            <form id="repoForm">
+                                <div class="input-group">
+                                    <label for="repoUrl">GitHub URL</label>
+                                    <div class="input-wrapper">
+                                        <i data-lucide="github" class="input-icon"></i>
+                                        <input type="url" id="repoUrl" required placeholder="https://github.com/owner/repository">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn primary-btn btn-block">
+                                    <i data-lucide="plus-circle"></i>
+                                    <span>Register & Scan</span>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Repository Overview List -->
+                        <div class="card glass span-8">
+                            <div class="card-header">
+                                <h3 class="card-title">Repository Catalog</h3>
+                                <p class="card-desc">Scanned systems and current status</p>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table" id="reposTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Primary Language</th>
+                                            <th>Size (KB)</th>
+                                            <th>Clone Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5" class="table-empty">Loading repositories...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </section>
+                
+                <!-- Section: Architecture -->
+                <section id="view-architecture" class="view-section hidden">
+                    <div class="arch-controls card glass">
+                        <div class="control-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <button id="triggerArchBtn" class="btn secondary-btn">
+                                    <i data-lucide="play-circle"></i>
+                                    <span>Trigger Architectural Scan</span>
+                                </button>
+                                <span class="status-indicator" id="archStatusText">No scan records.</span>
+                            </div>
+                            
+                            <!-- Sub Tabs: Mappings vs Diagrams -->
+                            <div class="tabs-control-row" style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 6px;">
+                                <button id="tabMappingBtn" class="tab-sub-btn active" onclick="switchArchSubTab('mappings')" style="background: none; border: none; color: var(--text-color); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 13px;">System Mappings</button>
+                                <button id="tabDiagramBtn" class="tab-sub-btn" onclick="switchArchSubTab('diagrams')" style="background: none; border: none; color: var(--text-muted); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 13px;">Mermaid Diagrams</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- PANEL A: SYSTEM MAPPINGS -->
+                    <div class="grid-layout margin-top" id="archMappingsPanel">
+                        <!-- Left Panel: Text structure list -->
+                        <div class="card glass span-4 ultra-height-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Package Tree</h3>
+                                <p class="card-desc">Scanned folder layout</p>
+                            </div>
+                            <div class="tree-container" id="packageTreeContainer">
+                                <div class="empty-state">Scan needed to preview structure tree.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Panel: SVG Graph Render -->
+                        <div class="card glass span-8 ultra-height-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Dependency & Call Graph</h3>
+                                <p class="card-desc">Interactive architectural mappings</p>
+                            </div>
+                            <div class="graph-canvas" id="graphCanvas">
+                                <div class="empty-state">No architectural graph parsed.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PANEL B: SYSTEM DIAGRAMS (Mermaid) -->
+                    <div class="grid-layout margin-top hidden" id="archDiagramsPanel">
+                        <!-- Sidebar select -->
+                        <div class="card glass span-3" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; min-height: 680px;">
+                            <h4 style="margin:0 0 0.5rem 0; color:var(--text-muted); font-size:12px; text-transform:uppercase;">Diagram Options</h4>
+                            <button class="diag-sel-btn active" onclick="showSelectedMermaid('class')" id="diag-btn-class">Class Diagram</button>
+                            <button class="diag-sel-btn" onclick="showSelectedMermaid('package')" id="diag-btn-package">Package Diagram</button>
+                            <button class="diag-sel-btn" onclick="showSelectedMermaid('component')" id="diag-btn-component">Component Diagram</button>
+                            <button class="diag-sel-btn" onclick="showSelectedMermaid('sequence')" id="diag-btn-sequence">Sequence Diagram</button>
+                            <button class="diag-sel-btn" onclick="showSelectedMermaid('usecase')" id="diag-btn-usecase">Use Case Diagram</button>
+                            <button class="diag-sel-btn" onclick="showSelectedMermaid('architecture')" id="diag-btn-architecture">Architecture Diagram</button>
+                        </div>
+
+                        <!-- Main Canvas -->
+                        <div class="card glass span-9" style="min-height: 680px; display: flex; flex-direction: column;">
+                            <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                                <h3 class="card-title" id="mermaidDiagramTitle">Class Diagram</h3>
+                                <p class="card-desc" id="mermaidDiagramDesc">Classes mapping, fields, and inheritance tree relationships</p>
+                            </div>
+                            <!-- Zoom controls toolbar -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-color);">
+                                <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 500;">Controls</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <button class="btn secondary-btn" onclick="zoomDiagram('arch', -0.15)" style="padding: 4px 10px; font-size: 11px; height: auto; min-width: auto; margin:0;"><i data-lucide="zoom-out" style="width:12px; height:12px; display:inline-block; vertical-align:middle;"></i></button>
+                                    <button class="btn secondary-btn" onclick="zoomDiagram('arch', 0.15)" style="padding: 4px 10px; font-size: 11px; height: auto; min-width: auto; margin:0;"><i data-lucide="zoom-in" style="width:12px; height:12px; display:inline-block; vertical-align:middle;"></i></button>
+                                    <button class="btn secondary-btn" onclick="resetDiagramZoom('arch')" title="Scale the diagram to fit the panel" style="padding: 4px 10px; font-size: 11px; height: auto; min-width: auto; margin:0;"><i data-lucide="scan" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i>Fit</button>
+                                    <span id="archZoomText" style="font-size: 11px; color: var(--accent); margin-left: 8px; font-family: monospace;">100%</span>
+                                </div>
+                            </div>
+                            <div style="flex-grow: 1; display: block; overflow: auto; padding: 1.5rem; text-align: center; position: relative;" id="mermaidRenderCanvas">
+                                <div class="empty-state">Scan needed to generate diagram drawings.</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Section: Source Code Metrics -->
+                <section id="view-metrics" class="view-section hidden">
+                    <div class="arch-controls card glass">
+                        <div class="control-row">
+                            <button id="triggerMetricsBtn" class="btn secondary-btn">
+                                <i data-lucide="play-circle"></i>
+                                <span>Trigger Source Code Analysis</span>
+                            </button>
+                            <span class="status-indicator" id="metricsStatusText">No scan records.</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Metrics Summary Widgets -->
+                    <div class="widgets-row margin-top">
+                        <div class="widget-card glass">
+                            <div class="widget-icon primary"><i data-lucide="files"></i></div>
+                            <div class="widget-info">
+                                <span class="widget-label">Total Classes</span>
+                                <h2 id="metricClassesCount">-</h2>
+                            </div>
+                        </div>
+                        <div class="widget-card glass">
+                            <div class="widget-icon accent"><i data-lucide="git-commit"></i></div>
+                            <div class="widget-info">
+                                <span class="widget-label">Total Methods</span>
+                                <h2 id="metricMethodsCount">-</h2>
+                            </div>
+                        </div>
+                        <div class="widget-card glass">
+                            <div class="widget-icon success"><i data-lucide="align-left"></i></div>
+                            <div class="widget-info">
+                                <span class="widget-label">Lines of Code</span>
+                                <h2 id="metricLinesOfCode">-</h2>
+                            </div>
+                        </div>
+                        <div class="widget-card glass">
+                            <div class="widget-icon danger"><i data-lucide="gauge"></i></div>
+                            <div class="widget-info">
+                                <span class="widget-label">Avg Complexity</span>
+                                <h2 id="metricAvgComplexity">-</h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-layout margin-top">
+                        <!-- Inheritance tree panel -->
+                        <div class="card glass span-4 max-height-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Inheritance Trees</h3>
+                                <p class="card-desc">JPA entities and hierarchy structures</p>
+                            </div>
+                            <div class="tree-container" id="inheritanceTreeContainer">
+                                <div class="empty-state">Trigger scan to compile inheritance hierarchies.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Class search list -->
+                        <div class="card glass span-8 max-height-card">
+                            <div class="card-header">
+                                <div class="header-flex">
+                                    <div>
+                                        <h3 class="card-title">Class Catalog</h3>
+                                        <p class="card-desc">Detailed metrics and fields list</p>
+                                    </div>
+                                    <div class="search-box">
+                                        <i data-lucide="search"></i>
+                                        <input type="text" id="classSearchInput" placeholder="Filter classes...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="class-list-container" id="classesContainer">
+                                <div class="empty-state">Select class profile to display details.</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Section: API Docs -->
+                <section id="view-apidocs" class="view-section hidden">
+                    <div class="arch-controls card glass">
+                        <div class="control-row">
+                            <button id="triggerApiBtn" class="btn secondary-btn">
+                                <i data-lucide="play-circle"></i>
+                                <span>Trigger API Doc Scan</span>
+                            </button>
+                            <span class="status-indicator" id="apiStatusText">No scan records.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-layout margin-top">
+                        <!-- Left Panel: Endpoint list -->
+                        <div class="card glass span-5 max-height-card">
+                            <div class="card-header">
+                                <h3 class="card-title">REST Endpoints</h3>
+                                <p class="card-desc">Routing paths and methods detected</p>
+                            </div>
+                            <div class="endpoints-list" id="endpointsListContainer">
+                                <div class="empty-state">Generate API documentation to list endpoints.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Panel: Raw Spec view / details -->
+                        <div class="card glass span-7 max-height-card">
+                            <div class="card-header">
+                                <h3 class="card-title">OpenAPI 3.0 Specification</h3>
+                                <p class="card-desc">JSON Swagger-compliant document</p>
+                            </div>
+                            <div class="spec-container" id="openapiSpecContainer">
+                                <pre><code id="openapiRawCode" class="json-code">Trigger analysis to compile specification JSON...</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- VIEW: DATABASE ANALYZER -->
+                <section id="view-database" class="view-section hidden">
+                    <div class="card glass header-card">
+                        <div class="control-row">
+                            <button id="triggerDbBtn" class="btn secondary-btn">
+                                <i data-lucide="play-circle"></i>
+                                <span>Trigger Database Analysis</span>
+                            </button>
+                            <span class="status-indicator" id="dbStatusText">No scan records.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-row margin-top">
+                        <div class="stat-widget glass">
+                            <div class="stat-icon-wrapper blue">
+                                <i data-lucide="database"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Tables</span>
+                                <span class="stat-val" id="dbTablesCount">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-widget glass">
+                            <div class="stat-icon-wrapper purple">
+                                <i data-lucide="git-merge"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Relationships</span>
+                                <span class="stat-val" id="dbRelationsCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-layout margin-top">
+                        <!-- Left Panel: ER Diagram Canvas -->
+                        <div class="card glass span-6 ultra-height-card" style="display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <h3 class="card-title">Entity Relationship Diagram</h3>
+                                <p class="card-desc">Interactive database ER schema mappings</p>
+                            </div>
+                            <!-- Zoom controls toolbar -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-color);">
+                                <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 500;">Controls</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <button class="btn secondary-btn" onclick="zoomDiagram('db', -0.15)" style="padding: 4px 10px; font-size: 11px; height: auto; min-width: auto; margin:0;"><i data-lucide="zoom-out" style="width:12px; height:12px; display:inline-block; vertical-align:middle;"></i></button>
+                                    <button class="btn secondary-btn" onclick="zoomDiagram('db', 0.15)" style="padding: 4px 10px; font-size: 11px; height: auto; min-width: auto; margin:0;"><i data-lucide="zoom-in" style="width:12px; height:12px; display:inline-block; vertical-align:middle;"></i></button>
+                                    <button class="btn secondary-btn" onclick="resetDiagramZoom('db')" title="Scale the diagram to fit the panel" style="padding: 4px 10px; font-size: 11px; height: auto; min-width: auto; margin:0;"><i data-lucide="scan" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i>Fit</button>
+                                    <span id="dbZoomText" style="font-size: 11px; color: var(--accent); margin-left: 8px; font-family: monospace;">100%</span>
+                                </div>
+                            </div>
+                            <div class="spec-container" id="erDiagramContainer" style="flex-grow: 1; display: block; overflow: auto; padding: 1.5rem; text-align: center; position: relative; min-height: 550px;">
+                                <div class="empty-state">Trigger analysis to compile database schema diagram.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Panel: Database Schema catalog summary -->
+                        <div class="card glass span-6 ultra-height-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Schema & Column Catalog</h3>
+                                <p class="card-desc">Database tables columns and keys summary</p>
+                            </div>
+                            <div class="tree-container" id="dbSummaryContainer" style="padding: 1rem; overflow-y: auto;">
+                                <div class="empty-state">Trigger database scan to view schema dictionary.</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- VIEW: CODE QUALITY -->
+                <section id="view-quality" class="view-section hidden">
+                    <div class="card glass header-card">
+                        <div class="control-row">
+                            <button id="triggerQualityBtn" class="btn secondary-btn">
+                                <i data-lucide="play-circle"></i>
+                                <span>Trigger Quality Analysis</span>
+                            </button>
+                            <span class="status-indicator" id="qualityStatusText">No scan records.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-row margin-top">
+                        <div class="stat-widget glass" style="flex: 1.5; display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem;">
+                            <div style="position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <svg style="transform: rotate(-90deg); width: 80px; height: 80px;">
+                                    <circle cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="transparent"/>
+                                    <circle id="qualityScoreCircle" cx="40" cy="40" r="34" stroke="var(--primary)" stroke-width="8" fill="transparent"
+                                            stroke-dasharray="213.6" stroke-dashoffset="213.6" style="transition: stroke-dashoffset 1s ease-out;"/>
+                                </svg>
+                                <span id="qualityScoreText" style="position: absolute; font-size: 20px; font-weight: 800; font-family: var(--font-display); color: var(--accent);">100</span>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label" style="font-size: 13px;">Platform Quality Score</span>
+                                <h3 style="margin: 0; font-size: 16px; color: var(--text-color);" id="qualityGradeText">Excellent</h3>
+                            </div>
+                        </div>
+
+                        <div class="stat-widget glass" style="flex: 1;">
+                            <div class="stat-icon-wrapper red">
+                                <i data-lucide="shield-alert"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Critical Smells</span>
+                                <span class="stat-val" id="qualityCriticalCount">0</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-widget glass" style="flex: 1;">
+                            <div class="stat-icon-wrapper yellow">
+                                <i data-lucide="alert-triangle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Warning Issues</span>
+                                <span class="stat-val" id="qualityWarningCount">0</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-widget glass" style="flex: 1;">
+                            <div class="stat-icon-wrapper blue">
+                                <i data-lucide="info"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Info Violations</span>
+                                <span class="stat-val" id="qualityInfoCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card glass margin-top max-height-card" style="min-height: 400px;">
+                        <div class="card-header">
+                            <h3 class="card-title">Code Quality Violations</h3>
+                            <p class="card-desc">Naming smells, complex loops, duplicates, and method lengths</p>
+                        </div>
+                        <div class="endpoints-list" id="qualityIssuesContainer" style="overflow-y: auto; padding: 0.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <div class="empty-state">Trigger analysis to check codebase quality smells.</div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- VIEW: SECURITY ANALYSIS -->
+                <section id="view-security" class="view-section hidden">
+                    <div class="card glass header-card">
+                        <div class="control-row">
+                            <button id="triggerSecurityBtn" class="btn secondary-btn">
+                                <i data-lucide="play-circle"></i>
+                                <span>Trigger Security Scan</span>
+                            </button>
+                            <span class="status-indicator" id="securityStatusText">No scan records.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-row margin-top">
+                        <div class="stat-widget glass" style="flex: 1.5; display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem;">
+                            <div class="stat-icon-wrapper red" style="width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                <i data-lucide="shield-alert" style="width:24px; height:24px;"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label" style="font-size: 13px;">Security Status</span>
+                                <h3 style="margin: 0; font-size: 16px; color: var(--text-color);" id="securityScoreText">0 Vulnerabilities</h3>
+                            </div>
+                        </div>
+
+                        <div class="stat-widget glass" style="flex: 1;">
+                            <div class="stat-icon-wrapper red">
+                                <i data-lucide="alert-octagon"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Critical Risks</span>
+                                <span class="stat-val" id="securityCriticalCount">0</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-widget glass" style="flex: 1;">
+                            <div class="stat-icon-wrapper orange">
+                                <i data-lucide="alert-triangle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">High Severity</span>
+                                <span class="stat-val" id="securityHighCount">0</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-widget glass" style="flex: 1;">
+                            <div class="stat-icon-wrapper blue">
+                                <i data-lucide="info"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Medium & Low</span>
+                                <span class="stat-val" id="securityMediumCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card glass margin-top max-height-card" style="min-height: 400px;">
+                        <div class="card-header">
+                            <h3 class="card-title">Security Vulnerability Audit Log</h3>
+                            <p class="card-desc">SQL injection dynamic construction, hardcoded properties/keys, and open paths</p>
+                        </div>
+                        <div class="endpoints-list" id="securityIssuesContainer" style="overflow-y: auto; padding: 0.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <div class="empty-state">Trigger analysis to check codebase security vulnerabilities.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: AI CHAT ASSISTANT -->
+                <section id="view-chat" class="view-section hidden">
+                    <div class="card glass" style="height: 680px; display: flex; flex-direction: column; padding: 0;">
+                        <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding: 1.25rem 1.5rem;">
+                            <h3 class="card-title">AI Codebase Assistant</h3>
+                            <p class="card-desc">Interact with the AI Navigator to query and understand files structure, APIs routes, schemas, and audits</p>
+                        </div>
+                        
+                        <!-- Chat Message Log Container -->
+                        <div id="chatMessageLog" style="flex-grow: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <div class="chat-bubble ai">
+                                <span class="chat-author">AI Navigator</span>
+                                <p class="chat-text">Welcome to CodeNavigator AI Assistant! Ask me any structural questions about this repository, for example:</p>
+                                <ul style="padding-left: 1.25rem; margin-top: 0.5rem; font-size: 13px;">
+                                    <li>"Summarize API endpoints"</li>
+                                    <li>"Show Database Entities and Columns"</li>
+                                    <li>"Explain the code quality flaws detected"</li>
+                                    <li>"List all identified security vulnerabilities"</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Chat Fast-Action Quick Prompts Tags -->
+                        <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1.5rem; border-top: 1px solid var(--border-color); overflow-x: auto; background: rgba(0,0,0,0.1); width: 100%;">
+                            <button class="badge badge-completed" onclick="submitQuickChat('Summarize API endpoints')" style="cursor: pointer; border: none; font-size: 11px;">Summarize APIs</button>
+                            <button class="badge badge-completed" onclick="submitQuickChat('Show Database Entities')" style="cursor: pointer; border: none; font-size: 11px;">Show DB Entities</button>
+                            <button class="badge badge-completed" onclick="submitQuickChat('Summarize Quality scan')" style="cursor: pointer; border: none; font-size: 11px;">Code Quality Flaws</button>
+                            <button class="badge badge-completed" onclick="submitQuickChat('List Security Vulnerabilities')" style="cursor: pointer; border: none; font-size: 11px;">Security Threats</button>
+                        </div>
+
+                        <!-- Chat Input Zone -->
+                        <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 1rem; align-items: center; width: 100%;">
+                            <input type="text" id="chatInputPrompt" placeholder="Type structural codebase question..." style="flex-grow: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; color: var(--text-color); font-size: 13px; outline: none; transition: border-color 0.2s;" onkeydown="handleChatKey(event)">
+                            <button id="sendChatBtn" class="btn primary-btn" style="margin: 0; min-width: auto; height: 42px; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="submitChatPrompt()">
+                                <i data-lucide="send" style="width:16px; height:16px;"></i>
+                                <span>Send</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+        
+    </div>
+
+    <!-- Toast Notification Overlay -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="app.js?v=2"></script>
+</body>
+</html>
